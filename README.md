@@ -75,7 +75,7 @@ The plain reading of knip's warning — "this dependency is unused, remove it fr
 
 Vite's `tryNodeResolve` (`packages/vite/src/node/plugins/resolve.ts`) sets `basedir = config.root` whenever a name appears in `resolve.dedupe`, then walks `<dir>/node_modules/<name>` upward from there. Under pnpm's default strict isolation (<https://pnpm.io/symlinked-node-modules-structure>) transitive dependencies are not hoisted to the workspace root's `node_modules`. So if `jotai` isn't a direct dependency of `packages/app`, the upward walk finds nothing — `dedupe` silently becomes a no-op and the build ships two copies anyway. Adding `jotai` to `packages/app/package.json` is what makes the dedupe contract enforceable.
 
-The same reasoning applies to `optimizeDeps.include`: vite's optimizer also resolves include names from `config.root`, and if it can't find them, logs `Failed to resolve dependency: <name>` and silently skips pre-bundling.
+The same reasoning applies to bare-name entries in `optimizeDeps.include`: vite's optimizer also resolves them from `config.root`, and if it can't find them, logs `Failed to resolve dependency: <name>` and silently skips pre-bundling. (Nested-syntax entries `'a > b'` are the exception — only the head needs to be a direct dep, which is why the suggested fix splits on `>`.)
 
 ### Proof 1 — via vitest
 
