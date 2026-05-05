@@ -75,7 +75,7 @@ The plain reading of knip's warning — "this dependency is unused, remove it fr
 
 Vite's `tryNodeResolve` (`packages/vite/src/node/plugins/resolve.ts`) sets `basedir = config.root` whenever a name appears in `resolve.dedupe`, then walks `<dir>/node_modules/<name>` upward from there. Under pnpm's default strict isolation (<https://pnpm.io/symlinked-node-modules-structure>) transitive dependencies are not hoisted to the workspace root's `node_modules`. So if `jotai` isn't a direct dependency of `packages/app`, the upward walk finds nothing — `dedupe` silently becomes a no-op and the build ships two copies anyway. Adding `jotai` to `packages/app/package.json` is what makes the dedupe contract enforceable.
 
-The same reasoning applies to bare-name entries in `optimizeDeps.include`: vite's optimizer also resolves them from `config.root`, and if it can't find them, logs `Failed to resolve dependency: <name>` and silently skips pre-bundling. (Nested-syntax entries `'a > b'` are the exception — only the head needs to be a direct dep, which is why the suggested fix splits on `>`.)
+The same reasoning applies to bare-name entries in `optimizeDeps.include`: vite's optimizer also resolves them from `config.root`, and if it can't find them, logs `Failed to resolve dependency: <name>, present in client 'optimizeDeps.include'` and silently skips pre-bundling — see [Proof 3](#proof-3--optimizedepsinclude-silently-fails-when-the-dep-isnt-a-direct-dep) below. (Nested-syntax entries `'a > b'` are the exception — only the head needs to be a direct dep, which is why the suggested fix splits on `>`.)
 
 ### Proof 1 — via vitest
 
@@ -107,3 +107,27 @@ pnpm --filter app start
 Prints `counter = 1`. Comment out `dedupe: ['jotai']` in `packages/app/vite.config.js` (the **vite**, not vitest, config) and re-run — same multi-instance warning, output becomes `counter = 0`. Restore the line afterwards.
 
 This second proof exists to demonstrate the false-positive bug applies to knip's *vite* plugin reading `vite.config.js` just as much as to its *vitest* plugin reading `vitest.config.js` — both plugins share `resolveConfig` and both miss the same fields.
+
+### Proof 3 — `optimizeDeps.include` silently fails when the dep isn't a direct dep
+
+Proofs 1 and 2 cover `resolve.dedupe`. This third proof covers `optimizeDeps.include` independently: under pnpm strict isolation, an include entry that isn't a direct dep of the package containing the config can't be resolved from `config.root`, so the optimizer logs a warning and skips pre-bundling.
+
+```sh
+pnpm --filter app exec vite optimize --force
+```
+
+With `jotai` listed in `packages/app/package.json`, the optimizer succeeds:
+
+```
+Optimizing dependencies:
+  jotai
+```
+
+Now remove `"jotai": "2.11.0"` from `packages/app/package.json`, run `pnpm install`, and re-run the same command:
+
+```
+Failed to resolve dependency: jotai, present in client 'optimizeDeps.include'
+Optimizing dependencies:
+```
+
+The warning confirms vite's optimizer resolves `optimizeDeps.include` names from `config.root` and silently no-ops when the dep isn't reachable from there — the same root-relative-resolution argument that makes `resolve.dedupe` brittle. Restore the dependency afterwards.
