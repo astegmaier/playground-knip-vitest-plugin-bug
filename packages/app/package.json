@@ -4,8 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "vite-node src/main.js",
-    "test": "vitest run",
-    "knip": "knip"
+    "test": "vitest run"
   },
   "dependencies": {
     "jotai": "2.11.0",
@@ -13,7 +12,6 @@
     "lib-writer": "workspace:*"
   },
   "devDependencies": {
-    "knip": "^6.10.0",
     "vite": "^7.0.0",
     "vite-node": "^3.0.0",
     "vitest": "^3.0.0"

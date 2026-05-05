@@ -1,5 +1,11 @@
 {
   "name": "playground-knip-vitest-plugin-bug",
   "private": true,
-  "packageManager": "pnpm@10.0.0"
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "knip": "knip"
+  },
+  "devDependencies": {
+    "knip": "6.11.0"
+  }
 }

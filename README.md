@@ -8,7 +8,7 @@ This repo demonstrates an issue with knip's vite and vitest plugins. Those plugi
 
 ```sh
 pnpm install
-pnpm --filter app knip
+pnpm knip
 ```
 
 Expected output:
