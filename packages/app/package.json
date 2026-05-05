@@ -1,0 +1,18 @@
+{
+  "name": "app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "knip": "knip"
+  },
+  "dependencies": {
+    "jotai": "2.11.0",
+    "lib-reader": "workspace:*",
+    "lib-writer": "workspace:*"
+  },
+  "devDependencies": {
+    "knip": "^6.10.0",
+    "vitest": "^3.0.0"
+  }
+}

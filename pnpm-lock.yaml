@@ -6,11 +6,19 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  packages/app:
     dependencies:
-      react-is:
-        specifier: ^19.0.0
-        version: 19.2.5
+      jotai:
+        specifier: 2.11.0
+        version: 2.11.0
+      lib-reader:
+        specifier: workspace:*
+        version: link:../lib-reader
+      lib-writer:
+        specifier: workspace:*
+        version: link:../lib-writer
     devDependencies:
       knip:
         specifier: ^6.10.0
@@ -18,6 +26,18 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(jiti@2.6.1)(yaml@2.8.4)
+
+  packages/lib-reader:
+    dependencies:
+      jotai:
+        specifier: 2.11.0
+        version: 2.11.0
+
+  packages/lib-writer:
+    dependencies:
+      jotai:
+        specifier: 2.10.0
+        version: 2.10.0
 
 packages:
 
@@ -656,6 +676,30 @@ packages:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
 
+  jotai@2.10.0:
+    resolution: {integrity: sha512-8W4u0aRlOIwGlLQ0sqfl/c6+eExl5D8lZgAUolirZLktyaj4WnxO/8a0HEPmtriQAB6X5LMhXzZVmw02X0P0qQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+
+  jotai@2.11.0:
+    resolution: {integrity: sha512-zKfoBBD1uDw3rljwHkt0fWuja1B76R7CjznuBO+mSX6jpsO1EBeWNRKpeaQho9yPI/pvCv4recGfgOXGxwPZvQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+
   js-tokens@9.0.1:
     resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
 
@@ -705,9 +749,6 @@ packages:
   postcss@8.5.14:
     resolution: {integrity: sha512-SoSL4+OSEtR99LHFZQiJLkT59C5B1amGO1NzTwj7TT1qCUgUO6hxOvzkOYxD+vMrXBM3XJIKzokoERdqQq/Zmg==}
     engines: {node: ^10 || ^12 || >=14}
-
-  react-is@19.2.5:
-    resolution: {integrity: sha512-Dn0t8IQhCmeIT3wu+Apm1/YVsJXsGWi6k4sPdnBIdqMVtHtv0IGi6dcpNpNkNac0zB2uUAqNX3MHzN8c+z2rwQ==}
 
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
@@ -1305,6 +1346,10 @@ snapshots:
 
   jiti@2.6.1: {}
 
+  jotai@2.10.0: {}
+
+  jotai@2.11.0: {}
+
   js-tokens@9.0.1: {}
 
   knip@6.11.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0):
@@ -1403,8 +1448,6 @@ snapshots:
       nanoid: 3.3.12
       picocolors: 1.1.1
       source-map-js: 1.2.1
-
-  react-is@19.2.5: {}
 
   resolve-pkg-maps@1.0.0: {}
 

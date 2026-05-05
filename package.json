@@ -1,17 +1,5 @@
 {
   "name": "playground-knip-vitest-plugin-bug",
   "private": true,
-  "type": "module",
-  "packageManager": "pnpm@10.0.0",
-  "scripts": {
-    "test": "vitest run",
-    "knip": "knip"
-  },
-  "dependencies": {
-    "react-is": "^19.0.0"
-  },
-  "devDependencies": {
-    "knip": "^6.10.0",
-    "vitest": "^3.0.0"
-  }
+  "packageManager": "pnpm@10.0.0"
 }
