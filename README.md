@@ -28,18 +28,8 @@ Expected output:
 Unused dependencies (1)
 jotai  package.json:11:6
 ```
-
+  
 That's the bug. `jotai` is correctly listed in `packages/app/package.json` — see [Why `jotai` really has to be a dependency](#why-jotai-really-has-to-be-a-dependency-of-packagesapp) at the bottom for the runtime proof.
-
-## Verifying a fix covers each case
-
-knip emits one `jotai` warning regardless of how many of the four locations reference it. To verify a patch covers a specific (config-file × field) combination, isolate that case by commenting out the other three references in `packages/app/vite.config.js` and `packages/app/vitest.config.js`, then re-run:
-
-```sh
-pnpm --filter app knip
-```
-
-If the patch is correct, none of the four isolated cases should produce a warning. If any single case still warns, that code path is unfixed.
 
 ## Suggested fix
 
