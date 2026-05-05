@@ -1,8 +1,10 @@
-# knip vitest plugin: false-positive on `resolve.dedupe`
+# knip vitest plugin: false-positive on `resolve.dedupe` / `optimizeDeps.include`
 
 A pnpm-workspace reproduction of a knip false-positive: a dependency referenced **only** in `vitest.config.js` (or `vite.config.js`) inside `resolve.dedupe` (or `optimizeDeps.include`) is flagged as unused — but removing it from `package.json` would silently break the build at runtime.
 
-This repro demonstrates that the dependency in question (`jotai`) is **not** removable: a vitest test passes with it deduped and fails without.
+This repro demonstrates that the dependency in question (`jotai`) is **not** removable: with the `dedupe` line in place a vitest test passes and a non-test `vite-node` run prints `counter = 1`; without it both produce the wrong result and jotai itself logs `Detected multiple Jotai instances`.
+
+The repro covers both knip plugins: knip's *vitest* plugin reads `vitest.config.js` and knip's *vite* plugin reads `vite.config.js`. Both share `resolveConfig` and both have the same false positive; the repro ships both config files so a fix has to handle both code paths.
 
 ## TL;DR
 
@@ -19,8 +21,11 @@ Source: `packages/knip/src/plugins/vitest/index.ts` `resolveConfig` only iterate
 └── packages/
     ├── app/
     │   ├── package.json               (declares jotai 2.11.0 — knip flags this as unused)
-    │   ├── vitest.config.js           (resolve.dedupe: ['jotai'])
-    │   └── src/counter.test.js        (imports lib-writer + lib-reader; never imports jotai)
+    │   ├── vite.config.js             (resolve.dedupe + optimizeDeps.include both reference 'jotai')
+    │   ├── vitest.config.js           (same shape — exercises knip's vitest plugin too)
+    │   └── src/
+    │       ├── main.js                (non-test entry — runnable via vite-node)
+    │       └── counter.test.js        (imports lib-writer + lib-reader; never imports jotai)
     ├── lib-writer/
     │   ├── package.json               (depends on jotai 2.10.0)
     │   └── index.js                   (exports `counterAtom`, `bumpCounter`)
@@ -74,7 +79,19 @@ Detected multiple Jotai instances. It may cause unexpected behavior with the def
 
 This proves the `dedupe` entry — and therefore the `jotai` declaration in `packages/app/package.json` — is load-bearing. Restore the line before the next step.
 
-### Step 3: run knip — `jotai` is incorrectly flagged
+### Step 3 (optional): same failure outside the test runner
+
+The bug isn't a test-runner artifact — `vite.config.js` has the same problem. To prove it, run the same dedupe-dependent code through plain vite (via `vite-node`, which uses vite's transform pipeline against `vite.config.js`):
+
+```sh
+pnpm --filter app start
+```
+
+With the `dedupe` line restored, this prints `counter = 1`. Comment the `dedupe` line out in `vite.config.js` (note: this is the **vite**, not vitest, config) and re-run — same `Detected multiple Jotai instances` warning, output becomes `counter = 0`. Restore the line afterwards.
+
+This step exists to demonstrate that the false-positive bug applies to knip's vite plugin reading `vite.config.js` just as much as to its vitest plugin reading `vitest.config.js` — both plugins share `resolveConfig` and both miss the same fields.
+
+### Step 4: run knip — `jotai` is incorrectly flagged
 
 ```sh
 pnpm --filter app knip
@@ -88,6 +105,8 @@ jotai  package.json:10:6
 ```
 
 This is wrong: step 2 just demonstrated that removing `jotai` from `packages/app/package.json` would break the build under pnpm strict isolation. The dependency is in `package.json` precisely so vite's resolver can find it at `packages/app/node_modules/jotai` when applying `resolve.dedupe`.
+
+The same false-positive applies to `optimizeDeps.include`. The repro lists `jotai` in **both** `resolve.dedupe` and `optimizeDeps.include` so a knip fix needs to detect both fields. (The dedupe entry is the one that's load-bearing for the failing test — `optimizeDeps.include` is included alongside it because it has the same false-positive shape and a complete fix should cover it too.)
 
 ## Why `jotai` has to be in `packages/app/package.json` even though no app source imports it
 
@@ -136,5 +155,7 @@ for (const id of cfg.optimizeDeps?.include ?? []) {
 - node: v24
 - pnpm: 10.x
 - knip: 6.11.0
+- vite: 7.x
+- vite-node: 3.x
 - vitest: 3.2.4
 - jotai: 2.10.0 (lib-writer) + 2.11.0 (lib-reader, app)
