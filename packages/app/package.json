@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "vite-node src/main.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bundle": "vite --force"
   },
   "dependencies": {
     "jotai": "2.11.0",

@@ -113,7 +113,7 @@ This second proof exists to demonstrate the false-positive bug applies to knip's
 Proofs 1 and 2 cover `resolve.dedupe`. This third proof covers `optimizeDeps.include` independently: under pnpm strict isolation, an include entry that isn't a direct dep of the package containing the config can't be resolved from `config.root`, so the optimizer logs a warning and skips pre-bundling.
 
 ```sh
-pnpm --filter app exec vite optimize --force
+pnpm --filter app bundle
 ```
 
 With `jotai` listed in `packages/app/package.json`, the optimizer succeeds:
